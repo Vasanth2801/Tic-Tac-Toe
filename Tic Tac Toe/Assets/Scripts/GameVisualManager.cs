@@ -1,7 +1,8 @@
+using Unity.Mathematics;
 using Unity.Netcode;
 using UnityEngine;
 
-public class GameVisualManager : MonoBehaviour
+public class GameVisualManager : NetworkBehaviour
 {
     private const float GRID_SIZE = 3.1f;
 
@@ -15,9 +16,16 @@ public class GameVisualManager : MonoBehaviour
 
     private void GameManager_onClickedOnGridPosition(object sender, GameManager.onClickedGridPositionEventArgs e)
     {
-        Transform spawnedCrossTransform = Instantiate(crossPrefab);
+        Debug.Log("GameManager_onClickedOnGridPosition");
+        SpawnObjectRpc(e.x, e.y);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void SpawnObjectRpc(int x, int y)
+    {
+        Debug.Log("SpawnObject");
+        Transform spawnedCrossTransform = Instantiate(crossPrefab, GetGridWorldPosition(x, y), Quaternion.identity);
         spawnedCrossTransform.GetComponent<NetworkObject>().Spawn(true);
-        spawnedCrossTransform.position = GetGridWorldPosition(e.x, e.y);
     }
 
     private Vector2 GetGridWorldPosition(int x, int y)
